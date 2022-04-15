@@ -14,7 +14,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 import ga.windpvp.statistics.client.TestClient;
 
 public class Statistics {
+	
+	/**
+	 * The amount of online WindSpigot servers there are
+	 */
+	private static AtomicInteger servers = new AtomicInteger(0);;
+	
+	/**
+	 * A map to keep track of keep alives and their expiry time
+	 */
+	ConcurrentMap<Socket, Integer> keepAliveTimeOutTime = new ConcurrentHashMap<>();
+	
+	/**
+	 * A map to signal connection closing
+	 */
+	ConcurrentMap<Socket, Boolean> shouldCloseConnection = new ConcurrentHashMap<>();
+	
+	/**
+	 * A map to track the player count on each server
+	 */
+	ConcurrentMap<Socket, Integer> playerCountMap = new ConcurrentHashMap<>();
 
+	/**
+	 * The socket of the server
+	 */
+	private ServerSocket serverSocket;
+	
+	
 	public static void main(String[] args) {
 		// Runnable for the statistics server
 		Runnable statisticsRunnable = (() -> {
@@ -75,12 +101,6 @@ public class Statistics {
 		*/
 	}
 
-	private ServerSocket serverSocket;
-
-	/**
-	 * The amount of online WindSpigot servers there are
-	 */
-	private static AtomicInteger servers = new AtomicInteger(0);;
 
 	private void run() throws IOException {
 		serverSocket = new ServerSocket(500);
@@ -130,22 +150,6 @@ public class Statistics {
 			this.startConnection(serverSocket.accept());
 		}
 	}
-	
-	/**
-	 * A map to keep track of keep alives and their expiry time
-	 */
-	ConcurrentMap<Socket, Integer> keepAliveTimeOutTime = new ConcurrentHashMap<>();
-	
-	/**
-	 * A map to signal connection closing
-	 */
-	ConcurrentMap<Socket, Boolean> shouldCloseConnection = new ConcurrentHashMap<>();
-	
-	/**
-	 * A map to track the player count on each server
-	 */
-	ConcurrentMap<Socket, Integer> playerCountMap = new ConcurrentHashMap<>();
-
 
 	public void startConnection(Socket clientSocket) {
 		// Initializes a new connection from a client
