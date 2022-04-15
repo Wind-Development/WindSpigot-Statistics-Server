@@ -247,9 +247,6 @@ public class Statistics {
 							continue;
 						}
 					}
-					
-					// Log to console
-					System.out.println("There is one " + inputLine + ".");
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
