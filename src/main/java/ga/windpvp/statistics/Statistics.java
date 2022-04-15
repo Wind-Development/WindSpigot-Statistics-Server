@@ -247,6 +247,9 @@ public class Statistics {
 				
 				// Start keep alive thread
 				new Thread(keepAliveRunnable).start();
+				
+				boolean newServerLock = false;
+				boolean removedServerLock = false;
 
 				// Handle client messages
 				while ((inputLine = in.readLine()) != null) {
@@ -272,19 +275,25 @@ public class Statistics {
 						
 					// Register a new server
 					} else if (inputLine.equalsIgnoreCase("new server")) {
-						servers.incrementAndGet();
+						if (!newServerLock) {
+							newServerLock = true;
+							servers.incrementAndGet();
+						}
 						
 					// Remove a server
 					} else if (inputLine.equalsIgnoreCase("removed server")) {
-						servers.decrementAndGet();
-						
-						// Unregister this client
-						shouldCloseConnection.remove(clientSocket);
-						keepAliveTimeOutTime.remove(clientSocket);
-						
-						// Close the connection
-						break;
-						
+						if (!removedServerLock) {
+							removedServerLock = true;
+							servers.decrementAndGet();
+							
+							// Unregister this client
+							shouldCloseConnection.remove(clientSocket);
+							keepAliveTimeOutTime.remove(clientSocket);
+							
+							// Close the connection
+							break;
+						}
+			
 					// Update keepalive status
 					} else if (inputLine.equalsIgnoreCase("keep alive packet")) {
 						keepAliveTimeOutTime.put(clientSocket, 100);
