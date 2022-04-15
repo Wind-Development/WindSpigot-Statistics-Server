@@ -77,6 +77,9 @@ public class Statistics {
 
 	private ServerSocket serverSocket;
 
+	/**
+	 * The amount of online WindSpigot servers there are
+	 */
 	private static AtomicInteger servers = new AtomicInteger(0);;
 
 	private void run() throws IOException {
@@ -85,11 +88,16 @@ public class Statistics {
 		
 		System.out.println("Started WindSpigot statistics server.");
 
-		// Scan for console input
+		// Scans for console input
 		Runnable consoleRunnable = (() -> {
+			// Log to console
 			System.out.println("Initialized console scanner.");
+			// Continuously scan
 			while (true) {
+				// The input command string
 				String command = scanner.nextLine();
+				
+				// Handle command
 				if (command.equalsIgnoreCase("servers")) {
 					System.out.println("There are " + servers.get() + " servers running WindSpigot.");
 				} else if (command.equalsIgnoreCase("stop")) {
@@ -102,6 +110,7 @@ public class Statistics {
 
 		new Thread(consoleRunnable).start();
 		
+		// Logs the amount of servers running WindSpigot every so often
 		Runnable repeatingDisplayRunnable = (() -> {
 			while (true) {
 				try {
@@ -113,15 +122,23 @@ public class Statistics {
 			}
 		});
 		
+		// Start the server count logger
 		new Thread(repeatingDisplayRunnable).start();
 
-		// Handle new connections on its own thread 
+		// Handle new connections on its own thread so the server can process multiple clients
 		while (true) {
 			this.startConnection(serverSocket.accept());
 		}
 	}
 	
+	/**
+	 * A map to keep track of keep alives and their expiry time
+	 */
 	ConcurrentMap<Socket, Integer> keepAliveTimeOutTime = new ConcurrentHashMap<>();
+	
+	/**
+	 * A map to signal connection closing
+	 */
 	ConcurrentMap<Socket, Boolean> shouldCloseConnection = new ConcurrentHashMap<>();
 
 
@@ -130,74 +147,100 @@ public class Statistics {
 		Runnable runnable = (() -> {
 			BufferedReader in;
 			try {
+				// Log to console
 				System.out.println("New connection established.");
+				// The connected client's input
 				in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 
 				String inputLine;
 				
+				// Handle keepalives 
 				Runnable keepAliveRunnable = (() -> {
 					
+					// Register this client
 					shouldCloseConnection.put(clientSocket, false);
 					keepAliveTimeOutTime.put(clientSocket, 100);
 					
 					while (true) {
+						
+						// Check for keepalive expiry every second
 						try {
 							TimeUnit.SECONDS.sleep(1);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
+						
+						// Make sure the client is registered
 						if (keepAliveTimeOutTime.get(clientSocket) != null) {
 							
+							// See if the keepalive is expired
 							if (keepAliveTimeOutTime.get(clientSocket) == 0) {
+								// Close the connection and decrement server count
 								shouldCloseConnection.put(clientSocket, true);
 								servers.decrementAndGet();
 								break;
 							}
 							
+							// Decrement client's keepalive count down
 							keepAliveTimeOutTime.put(clientSocket, keepAliveTimeOutTime.get(clientSocket) - 1);
 						}
 					}
 				});
 				
+				// Start keep alive thread
 				new Thread(keepAliveRunnable).start();
 
+				// Handle client messages
 				while ((inputLine = in.readLine()) != null) {
-					// Exit connection
+					
+					// Exit connection if keep alive has expired
 					if (shouldCloseConnection.get(clientSocket) != null) {
 						if (shouldCloseConnection.get(clientSocket)) {
 							
+							// Unregister client
 							shouldCloseConnection.remove(clientSocket);
 							keepAliveTimeOutTime.remove(clientSocket);
 							
+							// Log to console
 							System.out.println("There is one removed server.");
 							
+							// Close connection
 							break;
 						}
 					}
+					// Exit connection if told to do so by the client
 					if (inputLine.equalsIgnoreCase(".")) {
 						break;
 						
-						// Register a new server
+					// Register a new server
 					} else if (inputLine.equalsIgnoreCase("new server")) {
 						servers.incrementAndGet();
 						
-						// Remove a server
+					// Remove a server
 					} else if (inputLine.equalsIgnoreCase("removed server")) {
 						servers.decrementAndGet();
+						
+						// Unregister this client
 						shouldCloseConnection.remove(clientSocket);
 						keepAliveTimeOutTime.remove(clientSocket);
+						
+						// Close the connection
 						break;
 						
-						// Remove servers that are not sending keep alives
+					// Update keepalive status
 					} else if (inputLine.equalsIgnoreCase("keep alive packet")) {
 						keepAliveTimeOutTime.put(clientSocket, 100);
 					}
+					
+					// Log to console
 					System.out.println("There is one " + inputLine + ".");
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});
+		
+		// Start the connection with the client
 		new Thread(runnable).start();
 	}
 }
