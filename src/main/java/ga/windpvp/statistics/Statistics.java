@@ -18,7 +18,12 @@ public class Statistics {
 	/**
 	 * The amount of online WindSpigot servers there are
 	 */
-	private static AtomicInteger servers = new AtomicInteger(0);;
+	private static AtomicInteger servers = new AtomicInteger(0);
+	
+	/**
+	 * The total player count
+	 */
+	private static AtomicInteger players = new AtomicInteger(0);;
 	
 	/**
 	 * A map to keep track of keep alives and their expiry time
@@ -100,16 +105,13 @@ public class Statistics {
 		new Thread(clientRunnable).start();
 		*/
 	}
-
-
-	private void run() throws IOException {
-		serverSocket = new ServerSocket(500);
-		Scanner scanner = new Scanner(System.in);
-		
-		System.out.println("Started WindSpigot statistics server.");
-
+	
+	private void runConsoleInputTask() {
 		// Scans for console input
 		Runnable consoleRunnable = (() -> {
+			// Input scanner
+			Scanner scanner = new Scanner(System.in);
+
 			// Log to console
 			System.out.println("Initialized console scanner.");
 			// Continuously scan
@@ -124,26 +126,73 @@ public class Statistics {
 					System.out.println("Stopping...");
 					scanner.close();
 					System.exit(0);
+				} else if (command.equalsIgnoreCase("players")) {
+					System.out.println("There are " + players.get() + " players on WindSpigot servers.");
 				}
 			}
 		});
 
+		// Start scanning
 		new Thread(consoleRunnable).start();
-		
+	}
+	
+	private void runConsoleLogTask() {
 		// Logs the amount of servers running WindSpigot every so often
-		Runnable repeatingDisplayRunnable = (() -> {
+				Runnable repeatingDisplayRunnable = (() -> {
+					while (true) {
+						try {
+							Thread.sleep(1000000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						System.out.println("There are " + servers.get() + " servers running WindSpigot.");
+					}
+				});
+				
+				// Start the server count logger
+				new Thread(repeatingDisplayRunnable).start();
+	}
+	
+	private void runPlayerCountUpdateTask() {
+		// Updates the total player count every so often
+		Runnable repeatingPlayerCountRunnable = (() -> {
 			while (true) {
+				
 				try {
-					Thread.sleep(1000000);
+					TimeUnit.SECONDS.sleep(5);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				System.out.println("There are " + servers.get() + " servers running WindSpigot.");
+				
+				// Reset the player count
+				players.set(0);
+				
+				// Update the player count
+				for (Socket socket : playerCountMap.keySet()) {
+					
+					Integer count = playerCountMap.get(socket);
+					
+					if (count != null) {
+						players.addAndGet(count);
+					}
+					
+				}
 			}
 		});
+				
+		// Start Updating
+		new Thread(repeatingPlayerCountRunnable).start();
+	}
+
+
+	private void run() throws IOException {
+		serverSocket = new ServerSocket(500);
 		
-		// Start the server count logger
-		new Thread(repeatingDisplayRunnable).start();
+		System.out.println("Started WindSpigot statistics server.");
+
+		runConsoleInputTask();
+		runConsoleLogTask();	
+		runPlayerCountUpdateTask();
 
 		// Handle new connections on its own thread so the server can process multiple clients
 		while (true) {
@@ -151,7 +200,7 @@ public class Statistics {
 		}
 	}
 
-	public void startConnection(Socket clientSocket) {
+	private void startConnection(Socket clientSocket) {
 		// Initializes a new connection from a client
 		Runnable runnable = (() -> {
 			BufferedReader in;
@@ -257,7 +306,7 @@ public class Statistics {
 			}
 		});
 		
-		// Start the connection with the client
+		// Start the connection with the client on its own thread
 		new Thread(runnable).start();
 	}
 }
