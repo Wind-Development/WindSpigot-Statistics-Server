@@ -140,6 +140,11 @@ public class Statistics {
 	 * A map to signal connection closing
 	 */
 	ConcurrentMap<Socket, Boolean> shouldCloseConnection = new ConcurrentHashMap<>();
+	
+	/**
+	 * A map to track the player count on each server
+	 */
+	ConcurrentMap<Socket, Integer> playerCountMap = new ConcurrentHashMap<>();
 
 
 	public void startConnection(Socket clientSocket) {
@@ -230,6 +235,17 @@ public class Statistics {
 					// Update keepalive status
 					} else if (inputLine.equalsIgnoreCase("keep alive packet")) {
 						keepAliveTimeOutTime.put(clientSocket, 100);
+					} else if (inputLine.contains("player count packet")) {
+						inputLine.replace("player count packet ", "");
+						try {
+							// Get the player count in the string
+							int players = Integer.valueOf(inputLine);
+							
+							// Log it in the map
+							playerCountMap.put(clientSocket, players);
+						} catch (NumberFormatException e) {
+							continue;
+						}
 					}
 					
 					// Log to console
