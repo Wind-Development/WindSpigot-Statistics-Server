@@ -61,7 +61,7 @@ public class Statistics {
 
 		// Testing purposes (dummy clients)
 
-		/*
+		
 		try {
 			Thread.sleep(10);
 		} catch (InterruptedException e1) {
@@ -80,6 +80,8 @@ public class Statistics {
 						try {
 							client.sendMessage("keep alive packet");
 							System.out.println("Keep alive sent");
+							client.sendMessage("player count packet 5".toLowerCase());
+							System.out.println("Player count sent");
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
@@ -103,7 +105,7 @@ public class Statistics {
 		new Thread(clientRunnable).start();
 		new Thread(clientRunnable).start();
 		new Thread(clientRunnable).start();
-		*/
+		
 	}
 	
 	private void runConsoleInputTask() {
@@ -167,8 +169,12 @@ public class Statistics {
 				// Reset the player count
 				players.set(0);
 				
+				System.out.println("Updating player count");
+				
 				// Update the player count
 				for (Socket socket : playerCountMap.keySet()) {
+					
+					System.out.println("Updating player count");
 					
 					Integer count = playerCountMap.get(socket);
 					
@@ -282,7 +288,7 @@ public class Statistics {
 						
 					// Remove a server
 					} else if (inputLine.equalsIgnoreCase("removed server")) {
-						if (!removedServerLock) {
+						if (!removedServerLock && newServerLock) {
 							removedServerLock = true;
 							servers.decrementAndGet();
 							
@@ -297,18 +303,20 @@ public class Statistics {
 					// Update keepalive status
 					} else if (inputLine.equalsIgnoreCase("keep alive packet")) {
 						keepAliveTimeOutTime.put(clientSocket, 100);
-					} else if (inputLine.contains("player count packet")) {
-						inputLine.replace("player count packet ", "");
+					} else if (inputLine.contains("player count packet ")) {
+						System.out.println("Packet received");
 						try {
 							// Get the player count in the string
-							int players = Integer.valueOf(inputLine);
+							int players = Integer.valueOf(inputLine.replace("player count packet ", ""));
 							
 							// Log it in the map
 							playerCountMap.put(clientSocket, players);
+							System.out.println("Packet received");
 						} catch (NumberFormatException e) {
 							continue;
 						}
 					}
+					System.out.println(inputLine);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
