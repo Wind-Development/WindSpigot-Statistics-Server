@@ -247,6 +247,8 @@ public class Statistics {
 							
 							// Decrement client's keepalive count down
 							keepAliveTimeOutTime.put(clientSocket, keepAliveTimeOutTime.get(clientSocket) - 1);
+						} else {
+							break;
 						}
 					}
 				});
