@@ -68,7 +68,7 @@ public class Statistics {
 			e1.printStackTrace();
 		}
 
-		Runnable clientRunnable = (() -> {
+		/*Runnable clientRunnable = (() -> {
 			TestClient client = new TestClient();
 			try {
 				client.startConnection("localhost", 500);
@@ -105,6 +105,7 @@ public class Statistics {
 		new Thread(clientRunnable).start();
 		new Thread(clientRunnable).start();
 		new Thread(clientRunnable).start();
+		*/
 		
 	}
 	
@@ -169,12 +170,8 @@ public class Statistics {
 				// Reset the player count
 				players.set(0);
 				
-				System.out.println("Updating player count");
-				
 				// Update the player count
 				for (Socket socket : playerCountMap.keySet()) {
-					
-					System.out.println("Updating player count");
 					
 					Integer count = playerCountMap.get(socket);
 					
