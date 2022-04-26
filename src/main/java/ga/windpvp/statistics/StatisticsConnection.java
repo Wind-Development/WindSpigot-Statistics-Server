@@ -112,7 +112,6 @@ public class StatisticsConnection {
 							continue;
 						}
 					}
-					Logger.log(inputLine);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
