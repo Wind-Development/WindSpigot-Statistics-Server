@@ -98,14 +98,10 @@ public class StatisticsConnection {
 					} else if (inputLine.equalsIgnoreCase("keep alive packet")) {
 						keepAliveTimeOutTime = 100;
 					} else if (inputLine.toLowerCase().contains("player count packet ")) {
-						
-						// Debug, not functional yet
-						Logger.log("Packet received");
 						try {
 							// Get the player count in the string
 							players = Integer.valueOf(inputLine.toLowerCase().replace("player count packet ", ""));
 
-							Logger.log("Packet received");
 						} catch (NumberFormatException e) {
 							continue;
 						}
