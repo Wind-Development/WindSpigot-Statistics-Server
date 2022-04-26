@@ -15,7 +15,7 @@ public class StatisticsConnection {
 	 */
 	private static Executor connectionPool = Executors.newCachedThreadPool();
 
-	public volatile int keepAliveTimeOutTime = 100;
+	public volatile int keepAliveTimeOutTime = 180;
 	public volatile int players = 0;
 	
 	private volatile boolean hasDeregistered = false;
