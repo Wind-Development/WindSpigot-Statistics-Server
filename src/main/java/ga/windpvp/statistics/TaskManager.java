@@ -33,6 +33,8 @@ public class TaskManager {
 					System.exit(0);
 				} else if (command.equalsIgnoreCase("players")) {
 					Logger.log("There are " + Statistics.players.get() + " players on WindSpigot servers.");
+				} else if (command.equalsIgnoreCase("connection-list")) {
+					Logger.log(Statistics.connectionList.toString());
 				}
 			}
 		});
