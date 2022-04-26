@@ -10,11 +10,18 @@ public class StatisticsConnection {
 
 
 	public volatile int keepAliveTimeOutTime = 100;
-	public volatile boolean shouldCloseConnection = false;
-	
 	public volatile int players = 0;
 	
 	private volatile boolean hasDeregistered = false;
+	
+	public void closeConnection() {
+		// Deregister
+		Statistics.connectionList.remove(this);
+		Statistics.servers.decrementAndGet();
+		
+		// Prevent statistic from decrementing twice
+		hasDeregistered = true;
+	}
 
 	public void startConnection(Socket clientSocket) {
 		// Initializes a new connection from a client
@@ -42,13 +49,7 @@ public class StatisticsConnection {
 
 						// See if the keepalive is expired
 						if (keepAliveTimeOutTime == 0 && !hasDeregistered) {
-							// Close the connection and decrement server count
-							shouldCloseConnection = true;
-							Statistics.servers.decrementAndGet();
-							
-							// Prevent statistic from decrementing twice
-							hasDeregistered = true;
-							break;
+							closeConnection();
 						} else if (hasDeregistered) {
 							break;
 						}
@@ -69,14 +70,7 @@ public class StatisticsConnection {
 				while ((inputLine = in.readLine()) != null) {
 
 					// Exit connection if keep alive has expired
-					if (shouldCloseConnection) {
-						
-						Statistics.connectionList.remove(this);
-
-						// Log to console
-						Logger.log("There is one removed server.");
-
-						// Close connection
+					if (hasDeregistered) {
 						break;
 					}
 
@@ -98,11 +92,7 @@ public class StatisticsConnection {
 							// Prevent the client from removing the server multiple times
 							removedServerLock = true;
 							
-							// Tell keepalive to stop
-							hasDeregistered = true;
-							
-							// Remove the server from list
-							Statistics.servers.decrementAndGet();
+							closeConnection();
 
 							// Close the connection
 							break;
