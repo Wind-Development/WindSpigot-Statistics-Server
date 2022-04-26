@@ -13,8 +13,8 @@ public class StatisticsConnection {
 	/**
 	 * The pool for connections to use
 	 */
-	private static Executor connectionPool = Executors.newCachedThreadPool();
-
+	private static Executor connectionPool = Executors.newFixedThreadPool(10000);
+	
 	/**
 	 * The time out for the keep alive in seconds
 	 */
@@ -28,7 +28,7 @@ public class StatisticsConnection {
 	/**
 	 * Whether this connection has been unregistered
 	 */
-	private volatile boolean hasDeregistered = false;
+	private volatile boolean hasUnregistered = false;
 	
 	/**
 	 * Starts the keep alive handler
@@ -47,9 +47,9 @@ public class StatisticsConnection {
 				}
 
 				// See if the keepalive is expired
-				if (keepAliveTimeOutTime == 0 && !hasDeregistered) {
+				if (keepAliveTimeOutTime == 0 && !hasUnregistered) {
 					closeConnection();
-				} else if (hasDeregistered) {
+				} else if (hasUnregistered) {
 					break;
 				}
 
@@ -72,7 +72,7 @@ public class StatisticsConnection {
 		Statistics.servers.decrementAndGet();
 		
 		// Prevent statistic from decrementing twice
-		hasDeregistered = true;
+		hasUnregistered = true;
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class StatisticsConnection {
 				while ((clientInput = in.readLine()) != null) {
 
 					// Exit connection if keep alive has expired
-					if (hasDeregistered) {
+					if (hasUnregistered) {
 						break;
 					}
 
@@ -116,7 +116,7 @@ public class StatisticsConnection {
 
 						// Remove a server
 					} else if (clientInput.equalsIgnoreCase("removed server")) {
-						if (!removedServerLock && newServerLock && !hasDeregistered) {
+						if (!removedServerLock && newServerLock && !hasUnregistered) {
 							
 							// Prevent the client from removing the server multiple times
 							removedServerLock = true;
@@ -125,7 +125,7 @@ public class StatisticsConnection {
 
 							// Close the connection
 							break;
-						} else if (hasDeregistered) {
+						} else if (hasUnregistered) {
 							break;
 						}
 
