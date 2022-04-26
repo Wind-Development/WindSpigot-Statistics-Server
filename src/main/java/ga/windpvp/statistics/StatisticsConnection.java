@@ -4,10 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class StatisticsConnection {
 
+	/**
+	 * The pool for connections to use
+	 */
+	private static Executor connectionPool = Executors.newCachedThreadPool();
 
 	public volatile int keepAliveTimeOutTime = 100;
 	public volatile int players = 0;
@@ -61,7 +67,7 @@ public class StatisticsConnection {
 				});
 
 				// Start keep alive thread
-				new Thread(keepAliveRunnable).start();
+				connectionPool.execute(keepAliveRunnable);
 
 				boolean newServerLock = false;
 				boolean removedServerLock = false;
@@ -119,7 +125,7 @@ public class StatisticsConnection {
 		});
 
 		// Start the connection with the client on its own thread
-		new Thread(connectionRunnable).start();
+		connectionPool.execute(connectionRunnable);
 	}
 
 }
