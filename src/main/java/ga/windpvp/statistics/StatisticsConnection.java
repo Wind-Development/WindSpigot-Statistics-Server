@@ -31,6 +31,9 @@ public class StatisticsConnection {
 	 */
 	private volatile boolean hasUnregistered = false;
 	
+	boolean newServerLock = false;
+	boolean removedServerLock = false;
+	
 	/**
 	 * Starts the keep alive handler
 	 */
@@ -70,8 +73,9 @@ public class StatisticsConnection {
 	public void closeConnection() {
 		// Deregister
 		Statistics.connectionList.remove(this);
-		Statistics.servers.decrementAndGet();
-		
+		if (newServerLock) {
+			Statistics.servers.decrementAndGet();
+		}
 		// Prevent statistic from decrementing twice
 		hasUnregistered = true;
 	}
@@ -94,9 +98,6 @@ public class StatisticsConnection {
 				
 				// Handle keep alives
 				startKeepAliveHandler();
-				
-				boolean newServerLock = false;
-				boolean removedServerLock = false;
 
 				// Handle client messages
 				String clientInput;
@@ -148,6 +149,7 @@ public class StatisticsConnection {
 					} else if (clientInput.equalsIgnoreCase("query data")) {
 						output.writeUTF("servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
 						// Example result: servers 10, players 50
+						Logger.log("The API has been accessed, output: " +"servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
 						output.flush();
 					}
 				}
