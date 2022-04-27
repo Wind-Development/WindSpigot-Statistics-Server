@@ -1,9 +1,9 @@
 package ga.windpvp.statistics;
 
 import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -93,8 +93,8 @@ public class StatisticsConnection {
 				// The connected client's input
 				BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 				
-				// Output stream for communication with client 
-				DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
+				// Output for communication with client 
+	            PrintWriter output = new PrintWriter(clientSocket.getOutputStream(),true);
 				
 				// Handle keep alives
 				startKeepAliveHandler();
@@ -147,10 +147,9 @@ public class StatisticsConnection {
 						}
 						// Returns info to the client
 					} else if (clientInput.equalsIgnoreCase("query data")) {
-						output.writeUTF("servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
+						output.println("servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
 						// Example result: servers 10, players 50
 						Logger.log("The API has been accessed, output: " +"servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
-						output.flush();
 					}
 				}
 			} catch (IOException e) {
