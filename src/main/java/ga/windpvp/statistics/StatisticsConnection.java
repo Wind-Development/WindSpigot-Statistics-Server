@@ -1,6 +1,7 @@
 package ga.windpvp.statistics;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -87,7 +88,10 @@ public class StatisticsConnection {
 				Logger.log("New connection established.");
 				// The connected client's input
 				BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
+				
+				// Output stream for communication with client 
+				DataOutputStream output = new DataOutputStream(clientSocket.getOutputStream());
+				
 				// Handle keep alives
 				startKeepAliveHandler();
 				
@@ -140,6 +144,11 @@ public class StatisticsConnection {
 						} catch (NumberFormatException e) {
 							continue;
 						}
+						// Returns info to the client
+					} else if (clientInput.equalsIgnoreCase("query data")) {
+						output.writeUTF("servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
+						// Example result: servers 10, players 50
+						output.flush();
 					}
 				}
 			} catch (IOException e) {
