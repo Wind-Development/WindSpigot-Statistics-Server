@@ -101,7 +101,10 @@ public class StatisticsConnection {
 
 				// Handle client messages
 				String clientInput;
-				while ((clientInput = in.readLine()) != null) {
+				
+				while (true) {
+					
+					clientInput = in.readLine();
 
 					// Exit connection if keep alive has expired
 					if (hasUnregistered) {
@@ -149,7 +152,6 @@ public class StatisticsConnection {
 					} else if (clientInput.equalsIgnoreCase("query data")) {
 						output.println("servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
 						// Example result: servers 10, players 50
-						Logger.log("The API has been accessed, output: " +"servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
 					}
 				}
 			} catch (IOException e) {
