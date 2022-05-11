@@ -151,7 +151,7 @@ public class StatisticsConnection {
 						// Returns info to the client
 					} else if (clientInput.equalsIgnoreCase("query data")) {
 						output.println("servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
-						// Example result: servers 10, players 50
+						// Example return result: servers 10,players 50
 					}
 				}
 			} catch (IOException e) {
