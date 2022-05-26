@@ -26,15 +26,15 @@ public class TaskManager {
 
 				// Handle command
 				if (command.equalsIgnoreCase("servers")) {
-					Logger.log("There are " + Statistics.servers.get() + " servers running WindSpigot.");
+					Logger.log("There are " + Statistics.SERVERS.get() + " servers running WindSpigot.");
 				} else if (command.equalsIgnoreCase("stop")) {
 					Logger.log("Stopping...");
 					scanner.close();
 					System.exit(0);
 				} else if (command.equalsIgnoreCase("players")) {
-					Logger.log("There are " + Statistics.players.get() + " players on WindSpigot servers.");
+					Logger.log("There are " + Statistics.PLAYERS.get() + " players on WindSpigot servers.");
 				} else if (command.equalsIgnoreCase("connection-list")) {
-					Logger.log(Statistics.connectionList.toString());
+					Logger.log(Statistics.CONNECTIONLIST.toString());
 				}
 			}
 		});
@@ -52,7 +52,7 @@ public class TaskManager {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				Logger.log("There are " + Statistics.servers.get() + " servers running WindSpigot.");
+				Logger.log("There are " + Statistics.SERVERS.get() + " servers running WindSpigot.");
 			}
 		});
 
@@ -72,11 +72,11 @@ public class TaskManager {
 				}
 
 				// Reset the player count
-				Statistics.players.set(0);
+				Statistics.PLAYERS.set(0);
 
 				// Update the player count
-				for (StatisticsConnection connection : Statistics.connectionList) {
-					Statistics.players.addAndGet(connection.players);
+				for (StatisticsConnection connection : Statistics.CONNECTIONLIST) {
+					Statistics.PLAYERS.addAndGet(connection.players);
 				}
 				
 			}

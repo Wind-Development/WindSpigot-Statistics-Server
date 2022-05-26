@@ -72,9 +72,9 @@ public class StatisticsConnection {
 	 */
 	public void closeConnection() {
 		// Deregister
-		Statistics.connectionList.remove(this);
+		Statistics.CONNECTIONLIST.remove(this);
 		if (newServerLock) {
-			Statistics.servers.decrementAndGet();
+			Statistics.SERVERS.decrementAndGet();
 		}
 		// Prevent statistic from decrementing twice
 		hasUnregistered = true;
@@ -117,7 +117,7 @@ public class StatisticsConnection {
 					} else if (clientInput.equalsIgnoreCase("new server")) {
 						if (!newServerLock) {
 							newServerLock = true;
-							Statistics.servers.incrementAndGet();
+							Statistics.SERVERS.incrementAndGet();
 						}
 
 						// Remove a server
@@ -148,7 +148,7 @@ public class StatisticsConnection {
 						}
 						// Returns info to the client
 					} else if (clientInput.equalsIgnoreCase("query data")) {
-						output.println("servers " + Statistics.servers.get() + ",players " + Statistics.players.get());
+						output.println("servers " + Statistics.SERVERS.get() + ",players " + Statistics.PLAYERS.get());
 						// Example return result: servers 10,players 50
 					}
 				}
