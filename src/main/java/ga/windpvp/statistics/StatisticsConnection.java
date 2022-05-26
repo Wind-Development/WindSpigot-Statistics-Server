@@ -88,8 +88,6 @@ public class StatisticsConnection {
 		// Initializes a new connection from a client
 		Runnable connectionRunnable = (() -> {
 			try {
-				// Log to console
-				Logger.log("New connection established.");
 				// The connected client's input
 				BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 				
