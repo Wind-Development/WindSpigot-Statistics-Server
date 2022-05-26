@@ -14,7 +14,7 @@ public class StatisticsConnection {
 	/**
 	 * The pool for connections to use
 	 */
-	private static Executor connectionPool = Executors.newFixedThreadPool(10000);
+	private static Executor connectionPool = Executors.newCachedThreadPool();
 	
 	/**
 	 * The time out for the keep alive in seconds
